@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
-// Question struct represents a question with its answer and explanation
+// question struct represents a question with its answer and explanation
 type Question struct {
 	Question     string
 	Answer       string
@@ -24,14 +24,14 @@ func downloadFileFromBlob(accountName, accountKey, containerName, filePath strin
 	// create blob url
 	url := fmt.Sprintf("https.//%s.blob.core.windows.net/%s", accountName, containerName)
 
-	// create a new shard key credential
+	// create a new shared key credential
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		return err
 	}
 
 	// create a new blob client
-	client, err := azblob.NewBlobClientWithSharedKeyCredential(url, crd, nil)
+	client, err := azblob.NewBlobClientWithSharedKeyCredential(url, cred, nil)
 	if err != nil {
 		return err
 	}
@@ -54,32 +54,31 @@ func downloadFileFromBlob(accountName, accountKey, containerName, filePath strin
 	return ioutil.WriteFile(downloadPath, downloadData, 0644)
 }
 
-
 // uploadFileToBlob uploads a file to Azure Blob Storage
 func uploadFileToBlob(accountName, accountKey, containerName, filePath string) error {
-	// Construct the Blob URL
+	// create the Blob URL
 	url := fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, containerName)
 
-	// Create a new shared key credential
+	// create a new shared key credential
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		return err
 	}
 
-	// Create a new Container client
+	// create a new Container client
 	containerClient, err := azblob.NewContainerClientWithSharedKeyCredential(url, cred, nil)
 	if err != nil {
 		return err
 	}
 
-	// Open the local file
+	// open the local file
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Upload the file to Blob Storage
+	// upload the file to Blob Storage
 	ctx := context.Background()
 	_, err = containerClient.UploadFileToBlockBlob(ctx, file, azblob.UploadOption{})
 	return err
@@ -121,7 +120,7 @@ func writeQuestionsToCSV(questions []Question, outputPath string) error {
 	defer writer.Flush()
 
 	// write csv header
-	writer.Write([]string{"Question, "Answer", "Explanation"})
+	writer.Write([]string{"Question", "Answer", "Explanation"})
 
 	// Write each question to the CSV file
 	for _, question := range questions {
@@ -130,66 +129,40 @@ func writeQuestionsToCSV(questions []Question, outputPath string) error {
 	return nil
 }
 
-
-
-// readQuestionsFromFile reads questions from  a local text file
-func readQuestionsFromFile(filePath string) ([]Question, error) {
-	// read file content
-	file, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil,  err
-    }
-
-	// split the file content into lines
-	lines := strings.Split(string(file), "\n")
-	questions := []Question{}
-
-	// parse each line into a question struct
-	for _, line := range lines {
-		parts := strings.Split(line, "|") // assuming | as delimeter in text file
-		if len(parts) == 3 {
-			questions = append(questions, Question{Question: parts[0], Answer: parts[1], Explanation: parts[2]})
-		}
-	}
-	return questions, nil 
-}
-
-// writeQuestionsToCSV writes questions to a CSV file
-func writeQuestionsToCSV(questions []Question, outputPath string) error {
-	file, err := os.Create(outputPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// create a new CSV writer
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	// write the CSV header
-	writer.Write([]string{"Question", "Answer", "Explanation"})
-
-	// write each question to CSV file
-	for _, question := range questions {
-		writer.Write([]string{question.Question, question.Answer, question.Explanation})
-
-	}
-	return nil
-}
-
-// main function to orchestrate reading from input file and writing to output csv
 func main() {
-	inputFilePath := "input/questions.txt"
-	outputFilePath := "output/questions.csv"
+	// Define Azure Blob Storage credentials and parameters
+	accountName := "your_account_name"
+	accountKey := "your_account_key"
+	containerName := "your_container_name"
+	inputBlobName := "questions.txt"
+	outputBlobName := "questions.csv"
+	downloadPath := "input/questions.txt"
+	outputPath := "output/questions.csv"
 
-	questions, err := readQuestionsFromFile(inputFilePath)
+	// Download the input file from Blob Storage
+	err := downloadFileFromBlob(accountName, accountKey, containerName, inputBlobName, downloadPath)
 	if err != nil {
-		fmt.Println("Error reading questions:", err)
-		return
+		log.Fatalf("Error downloading file: %v", err)
 	}
 
-	err = writeQuestionsToCSV(questions, outputFilePath)
+	// Read questions from the downloaded file
+	questions, err := readQuestionsFromFile(downloadPath)
 	if err != nil {
-		fmt.Println("Error writing to CSV:", err)
+		log.Fatalf("Error reading questions: %v", err)
 	}
+
+	// Write the questions to a CSV file
+	err = writeQuestionsToCSV(questions, outputPath)
+	if err != nil {
+		log.Fatalf("Error writing to CSV: %v", err)
+	}
+
+	// upload the output csv file to blob storage
+	err = UploadFileToBlob(accountName, accountKey, containerName, outputPath)
+	if err != nil {
+	    log.Fatal("Error uploading: %v", err)
+	}
+
+	fmt.Println("File processed and uploaded successfully!")
 }
+
