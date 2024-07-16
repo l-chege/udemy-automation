@@ -1,0 +1,12 @@
+| Question                                               | Answer                                                           | Explanation                                      |
+|--------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------|
+| What is Go?                                            | A programming language created by Google.                        | Go is known for its simplicity and performance.  |
+| What is a goroutine?                                   | A lightweight thread managed by Go runtime.                      | Goroutines are cheaper than threads.             |
+| Explain the difference between concurrency and parallelism. | Concurrency is about dealing with many tasks at once, while parallelism is about doing many tasks at once. | Concurrency is about structure, parallelism is about execution. |
+| What is a package in Go?                               | A package is a way to group functions, variables, and other types together. | Packages are used to organize code and prevent name conflicts. |
+| How do you handle errors in Go?                        | Errors in Go are handled using the built-in error type and the if statement. | Go does not use exceptions, but rather explicit error checking. |
+| What is a slice in Go?                                 | A slice is a dynamically-sized, flexible view into the elements of an array. | Slices are more powerful than arrays and are used extensively in Go. |
+| Explain the purpose of the defer statement.            | The defer statement is used to ensure that a function call is performed later in a program's execution, usually for purposes of cleanup. | Defer is often used for closing files or releasing resources. |
+| What is the use of the `go` keyword?                   | The `go` keyword is used to start a new goroutine.               | Goroutines are functions or methods that run concurrently with other functions or methods. |
+| How does Go handle memory management?                  | Go uses garbage collection to manage memory automatically.       | This helps to avoid memory leaks and other memory-related issues. |
+| What is the `interface{}` type in Go?                  | `interface{}` is an empty interface that can hold values of any type. | It is used for type-agnostic functions and data structures. |
