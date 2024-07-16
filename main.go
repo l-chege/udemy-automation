@@ -104,9 +104,31 @@ func readQuestionsFromFile(filePath string) ([]Question, error) {
 			questions = append(questions, Question{Question: parts[0], Answer: parts[1], Explanation: parts[2]})
 		}
 	}
+	return questions, nil
 }
 
+// writeQuestionsToCSV writes questions to a CSV file
+func writeQuestionsToCSV(questions []Question, outputPath string) error {
+	// create output CSV file
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
+	// create new csv writer
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// write csv header
+	writer.Write([]string{"Question, "Answer", "Explanation"})
+
+	// Write each question to the CSV file
+	for _, question := range questions {
+		writer.Write([]string{question.Question, question.Answer, question.Explanation})
+	}
+	return nil
+}
 
 
 
