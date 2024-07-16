@@ -16,7 +16,7 @@ type Question struct {
 
 // readQuestionsFromFile reads questions from  a local text file
 func readQuestionsFromFile(filePath string) ([]Question, error) {
-	// reaf file content
+	// read file content
 	file, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil,  err
@@ -57,4 +57,21 @@ func writeQuestionsToCSV(questions []Question, outputPath string) error {
 
 	}
 	return nil
+}
+
+// main function to orchestrate reading from input file and writing to output csv
+func main() {
+	inputFilePath := "input/questions.txt"
+	outputFilePath := "output/questions.csv"
+
+	questions, err := readQuestionsFromFile(inputFilePath)
+	if err != nil {
+		fmt.Println("Error reading questions:", err)
+		return
+	}
+
+	err = writeQuestionsToCSV(questions, outputFilePath)
+	if err != nil {
+		fmt.Println("Error writing to CSV:", err)
+	}
 }
