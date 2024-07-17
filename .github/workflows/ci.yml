@@ -1,3 +1,5 @@
+# runs tests on each push to main branch and on pull requests. It also deploys the Azure Function to Azure.
+
 name: CI/CD Pipeline
 
 on:
